@@ -30,7 +30,7 @@ Mutable tag that represents the latest non-Node-variant, vanilla `cimg/openjdk` 
 
 Stub text.
 
-## Development
+## Development with CI
 
 Working on CircleCI Docker images.
 
@@ -42,6 +42,43 @@ Upon successful commits to non-master branches of this repository, OpenJDK versi
 
 ### Patching bugs and vulnerabilities
 Monthly release tags can be manually re-published to patch vulnerabilities or severe bugs via a pushing a `git` tag that contains the string `monthly`. This tag will trigger a workflow that will rebuild all current `<openjdk-version>-<year>.<month>` and `<openjdk-version>-<year>.<month>-node` tags, as well as the `<openjdk-version>-stable`, `<openjdk-version>-stable-node`, and `latest` alias tags.
+
+## Local development
+
+Images can also be built and tested locally.
+
+### Generating Dockerfiles
+To generate Dockerfiles, use the `generate-dockerfiles.sh` script:
+
+```shell
+# use `-v` or `--variant` to pass either `openjdk` or `node`
+bash generate-dockerfiles.sh --variant openjdk -- cimg/base:edge # create openjdk Dockerfiles only
+bash generate-dockerfiles.sh -v node -- cimg/base:edge-node # create openjdk-node Dockerfiles only
+
+# without flags, the script will generate both openjdk and openjdk-node Dockerfiles
+bash generate-dockerfiles.sh -- cimg/base:edge
+
+# pass cimg/base:stable or cimg/base:stable-node to the script for monthly releases
+# pass cimg/base:edge or cimg/base:edge-node when working on master or any other branch
+```
+
+### Linting Dockerfiles
+`cimg` images use `hadolint` to lint Dockerfiles ([installation instructions](https://github.com/hadolint/hadolint#install)).
+
+Once `hadolint` is available locally, use the `shared/lint.sh` script to lint Dockerfiles:
+
+```shell
+# use `-i` or `--ignore-rule` to pass a comma-separated list of Docker/Shellcheck lint rules to ignore
+bash shared/lint.sh -i DL3000,SC1010 -- app/test.Dockerfile,app/deploy.Dockerfile
+
+# use `-t` or `--trusted-registries` to pass a comma-separated list of trusted registries
+bash shared/lint.sh --ignore-rules SC1010 -t docker.io -- "$(find */Dockerfile | tr '\n' ',')"
+bash shared/lint.sh --trusted-registries my.registry:5000 -- Dockerfile
+
+# pass a comma-separated list of Dockerfiles to lint, or an expression that resolves to such a list
+# if a `.hadolint.yaml` file is present in the working directory, the script will use it automatically
+bash shared/lint.sh -- "$(find */*/Dockerfile | tr '\n' ',')"
+```
 
 ### Contributing
 We welcome [issues](https://github.com/CircleCI-Public/cimg-openjdk/issues) to and [pull requests](https://github.com/CircleCI-Public/cimg-openjdk/pulls) against this repository!
