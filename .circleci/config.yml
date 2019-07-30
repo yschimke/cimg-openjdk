@@ -1,9 +1,11 @@
 version: 2.1
 
+# ORBS
 orbs:
   bt: circleci/build-tools@2.6.3
-  cimg: cci-dev/cimg@0.0.27
+  cimg: cci-dev/cimg@0.0.28
 
+# PIPELINE PARAMS
 parameters:
   lang:
     type: string
@@ -39,6 +41,7 @@ parameters:
     type: string
     default: ""
 
+# YAML ANCHORS
 publish-tags: &publish-tags
   latest<<#pipeline.parameters.monthly>>,<<pipeline.parameters.version>>-stable<</pipeline.parameters.monthly>>
 
@@ -59,6 +62,7 @@ monthly-tag-jobs-filters: &monthly-tag-jobs-filters
   tags:
     only: /.*monthly.*/
 
+# JOBS
 jobs:
   trigger-pipeline-builds:
     executor: cimg/base
@@ -138,6 +142,7 @@ jobs:
       - store_artifacts:
           path: ~/project
 
+# WORKFLOWS
 workflows:
   monthly-cron-trigger:
     triggers:
